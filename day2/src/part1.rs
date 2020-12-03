@@ -3,7 +3,9 @@ mod lib;
 
 fn main() {
     let rules = lib::load_rules();    
-    let valid = rules.filter(|(rule, text)| rule.is_valid(&text)).count();
+    let valid = rules
+        .map(Result::unwrap)
+        .filter(|(rule, text)| rule.is_valid(&text)).count();
     println!("Valid passwords: {}", valid);
 }
 
