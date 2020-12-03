@@ -9,4 +9,8 @@ edition = "2018"
 name = "part1"
 path = "src/part1.rs"
 
+[[bin]]
+name = "part2"
+path = "src/part2.rs"
+
 [dependencies]
