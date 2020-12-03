@@ -22,6 +22,21 @@ impl Col {
     }
 }
 
+pub fn count_trees_for_slope(col: usize, row: usize) -> usize {
+    let mut row = 0;
+    let mut tree_count = 0;
+    const COLUMNS: usize = 31;
+
+    for col in parse_input().skip(0) {
+        let symbol = col.iter_symbols().skip(row % COLUMNS).next().unwrap();
+        if symbol == Symbol::Tree {
+            tree_count += 1;
+        }
+        row += 3;
+    }
+    tree_count
+}
+
 pub fn parse_input() -> impl Iterator<Item=Col> {
     let f = File::open("day3/input.txt").unwrap();
     let f = BufReader::new(f);
