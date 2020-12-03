@@ -26,13 +26,17 @@ pub fn count_trees_for_slope(col_slope: usize, row_slope: usize) -> usize {
     let mut row = 0;
     let mut tree_count = 0;
     const COLUMNS: usize = 31;
+    let mut col_iter = parse_input();
 
-    for col in parse_input().skip(row_slope - 1) {
+    while let Some(col) = col_iter.next()  {
         let symbol = col.iter_symbols().skip(row % COLUMNS).next().unwrap();
         if symbol == Symbol::Tree {
             tree_count += 1;
         }
         row += col_slope;
+        for _ in 1..row_slope {
+            col_iter.next();
+        }
     }
     tree_count
 }
