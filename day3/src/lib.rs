@@ -22,17 +22,17 @@ impl Col {
     }
 }
 
-pub fn count_trees_for_slope(col: usize, row: usize) -> usize {
+pub fn count_trees_for_slope(col_slope: usize, row_slope: usize) -> usize {
     let mut row = 0;
     let mut tree_count = 0;
     const COLUMNS: usize = 31;
 
-    for col in parse_input().skip(0) {
+    for col in parse_input().skip(row_slope - 1) {
         let symbol = col.iter_symbols().skip(row % COLUMNS).next().unwrap();
         if symbol == Symbol::Tree {
             tree_count += 1;
         }
-        row += 3;
+        row += col_slope;
     }
     tree_count
 }
