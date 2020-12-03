@@ -8,10 +8,10 @@ edition = "2018"
 
 
 [[bin]]
-name = "part1"
+name = "day3part1"
 path = "src/part1.rs"
 [[bin]]
-name = "part2"
+name = "day3part2"
 path = "src/part2.rs"
 
 [dependencies]

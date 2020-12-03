@@ -9,5 +9,5 @@ fn main() {
          * lib::count_trees_for_slope(5, 1)
          * lib::count_trees_for_slope(7, 1)
          * lib::count_trees_for_slope(1, 2)
-    );
+    ); 
 }

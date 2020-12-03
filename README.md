@@ -1,5 +1,5 @@
 # Usage
 Current working directory must be git-project root.
 ```
-cargo run -p day1 --bin part2
+cargo run --bin day1part2
 ```
