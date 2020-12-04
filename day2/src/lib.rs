@@ -1,16 +1,8 @@
 use utils::Error;
 
-fn split_once(input: &str, delimiter: char) -> Result<(&str, &str), Error> {
-    let mut first = input.splitn(2, delimiter);
-    return Ok((
-        first.next().unwrap_or(""), 
-        first.next().ok_or(Error::Split(delimiter))?
-    ));
-}
-
 fn parse_line(input: &str) -> Result<(OccurenceRule, String), Error> {
-    let (min_text, rest) = split_once(input, '-')?;
-    let (max_text, rest) = split_once(rest, ' ')?;                    
+    let (min_text, rest) = utils::split_once(input, '-')?;
+    let (max_text, rest) = utils::split_once(rest, ' ')?;                    
 
     let min = min_text.parse()?;
     let max = max_text.parse()?;

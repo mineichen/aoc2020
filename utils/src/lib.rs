@@ -15,16 +15,18 @@ pub enum Error {
 }
 
 pub struct LineReaderIterator<T, TFn: Fn(&str) -> Result<T, Error>> {
-    lines: BufReader<File>,
+    reader: BufReader<File>,
     buffer: String,
     mapper: TFn
 }
 
 impl<T, TFn: Fn(&str) -> Result<T, Error>> LineReaderIterator<T, TFn> {
     pub fn from_file<P: AsRef<std::path::Path>>(path: P, mapper: TFn) -> Self {
-        let f = File::open(path).unwrap();
-        let f = BufReader::new(f);
-        LineReaderIterator { lines: f, buffer: String::new(), mapper: mapper }
+        LineReaderIterator { 
+            reader: BufReader::new(File::open(path).unwrap()), 
+            buffer: String::new(), 
+            mapper
+         }
     }
 }
 
@@ -33,7 +35,7 @@ impl<T, TFn: Fn(&str) -> Result<T, Error>> Iterator for LineReaderIterator<T, TF
 
     fn next(&mut self) -> Option<Self::Item> {
         self.buffer.clear();
-        match self.lines.read_line(&mut self.buffer) {
+        match self.reader.read_line(&mut self.buffer) {
             Ok(n) if n > 0 =>  {
                 Some((self.mapper)(&self.buffer.trim_end()))                
             },
@@ -45,6 +47,14 @@ impl<T, TFn: Fn(&str) -> Result<T, Error>> Iterator for LineReaderIterator<T, TF
             }
         }
     }
+}
+
+pub fn split_once(input: &str, delimiter: char) -> Result<(&str, &str), Error> {
+    let mut first = input.splitn(2, delimiter);
+    return Ok((
+        first.next().unwrap_or(""), 
+        first.next().ok_or(Error::Split(delimiter))?
+    ));
 }
 
 #[cfg(test)]
