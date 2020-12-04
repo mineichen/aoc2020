@@ -1,18 +1,4 @@
-use std::io::BufReader;
-use std::io::prelude::*;
-use std::fs::File;
-
-#[derive(thiserror::Error, Debug)]
-pub enum Error {
-    #[error("io")]
-    Io(#[from] std::io::Error),
-    #[error("parse")]
-    Parse(#[from] std::num::ParseIntError),
-    #[error("Format exception")]
-    Format(&'static str),
-    #[error("Format exception {0}")]
-    Split(char)
-}
+use utils::Error;
 
 fn split_once(input: &str, delimiter: char) -> Result<(&str, &str), Error> {
     let mut first = input.splitn(2, delimiter);
@@ -20,11 +6,6 @@ fn split_once(input: &str, delimiter: char) -> Result<(&str, &str), Error> {
         first.next().unwrap_or(""), 
         first.next().ok_or(Error::Split(delimiter))?
     ));
-}
-
-pub struct FileReaderIterator {
-    lines: BufReader<File>,
-    buffer: String
 }
 
 fn parse_line(input: &str) -> Result<(OccurenceRule, String), Error> {
@@ -39,33 +20,12 @@ fn parse_line(input: &str) -> Result<(OccurenceRule, String), Error> {
 
     let (offset, _) = chars.skip(2).next().ok_or(Error::Format("No text provided in role"))?;
     let text = rest.split_at(offset).1;
-    // Try to get rid of more
-    Ok((rule, text.to_string()))
-}
-
-impl Iterator for FileReaderIterator {
-    type Item = Result<(OccurenceRule, String), Error>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.buffer.clear();
-        match self.lines.read_line(&mut self.buffer) {
-            Ok(n) if n > 0 =>  {
-                Some(parse_line(&self.buffer))                
-            },
-            Ok(_) => {
-                None
-            }
-            Err(e) => {
-                Some(Err(e.into()))
-            }
-        }
-    }
+    
+    Ok((rule, text.to_owned()))
 }
 
 pub fn load_rules() -> impl Iterator<Item=Result<(OccurenceRule, String), Error>> {
-    let f = File::open("day2/input.txt").unwrap();
-    let f = BufReader::new(f);
-    FileReaderIterator { lines: f, buffer: String::new() }
+    utils::LineReaderIterator::from_file("day2/input.txt", parse_line)
 }
 
 #[derive(Debug)]

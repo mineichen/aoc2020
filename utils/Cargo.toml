@@ -1,18 +1,10 @@
 [package]
-name = "day2"
+name = "utils"
 version = "0.1.0"
 authors = ["Markus Ineichen <kusi.ineichen@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[[bin]]
-name = "day2part1"
-path = "src/part1.rs"
-
-[[bin]]
-name = "day2part2"
-path = "src/part2.rs"
-
 [dependencies]
-utils = { path = "../utils" }
+thiserror = "1.0"

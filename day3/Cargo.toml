@@ -13,5 +13,3 @@ path = "src/part1.rs"
 [[bin]]
 name = "day3part2"
 path = "src/part2.rs"
-
-[dependencies]
