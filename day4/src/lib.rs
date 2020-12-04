@@ -19,7 +19,7 @@ bitflags::bitflags! {
     }
 }
 
-pub fn count_valid_passports<T: Fn(Flags, &str) -> bool>(validator: T) -> u32 {
+pub fn count_valid_passports<T: Fn(Flags, &str) -> Result<bool, utils::Error>>(validator: T) -> u32 {
     let mut iter = utils::LineReaderIterator::from_file("day4/input.txt", |line| {
         
         let mut result = Flags::empty();

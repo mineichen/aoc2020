@@ -10,6 +10,10 @@ edition = "2018"
 name = "day4part1"
 path = "src/part1.rs"
 
+[[bin]]
+name = "day4part2"
+path = "src/part2.rs"
+
 [dependencies]
 utils = { path = "../utils" }
 bitflags = "1.2"
