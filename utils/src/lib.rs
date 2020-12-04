@@ -14,23 +14,38 @@ pub enum Error {
     Split(char)
 }
 
-pub struct LineReaderIterator<T, TFn: Fn(&str) -> Result<T, Error>> {
-    reader: BufReader<File>,
+pub struct LineReaderIterator<T, TFn: Fn(&str) -> Result<T, Error>, TRead: Read> {
+    reader: BufReader<TRead>,
     buffer: String,
     mapper: TFn
 }
 
-impl<T, TFn: Fn(&str) -> Result<T, Error>> LineReaderIterator<T, TFn> {
+impl<T, TFn: Fn(&str) -> Result<T, Error>> LineReaderIterator<T, TFn, File> {
     pub fn from_file<P: AsRef<std::path::Path>>(path: P, mapper: TFn) -> Self {
+        LineReaderIterator::from_reader(File::open(path).unwrap(), mapper)
+    }
+}
+
+impl<T, TFn: Fn(&str) -> Result<T, Error>> LineReaderIterator<T, TFn, std::io::Cursor<String>> {
+    pub fn from_string(i: String, mapper: TFn) -> Self {
+        LineReaderIterator::from_reader(std::io::Cursor::new(i), mapper)
+    }
+}
+
+impl<T, TFn: Fn(&str) -> Result<T, Error>, TRead: Read> LineReaderIterator<T, TFn, TRead> {
+    pub fn from_reader(read: TRead, mapper: TFn) -> Self {
         LineReaderIterator { 
-            reader: BufReader::new(File::open(path).unwrap()), 
+            reader: BufReader::new(read), 
             buffer: String::new(), 
             mapper
          }
     }
 }
 
-impl<T, TFn: Fn(&str) -> Result<T, Error>> Iterator for LineReaderIterator<T, TFn> {
+
+
+
+impl<T, TFn: Fn(&str) -> Result<T, Error>, TRead: Read> Iterator for LineReaderIterator<T, TFn, TRead> {
     type Item = Result<T, Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
