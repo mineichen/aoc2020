@@ -10,5 +10,9 @@ edition = "2018"
 name = "day6part1"
 path = "src/part1.rs"
 
+[[bin]]
+name = "day6part2"
+path = "src/part2.rs"
+
 [dependencies]
 utils = { path = "../utils" }

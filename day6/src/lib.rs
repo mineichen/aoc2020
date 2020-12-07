@@ -1,11 +1,11 @@
-pub fn get_grouped_flags() -> impl Iterator<Item=Poll> {
-    PollIterator(utils::LineReaderIterator::from_file("day6/input.txt", |line| {
+pub fn read_flags() -> impl Iterator<Item=Poll> {
+    utils::LineReaderIterator::from_file("day6/input.txt", |line| {
         let flags = line.chars().fold(0, |acc, n| acc | 1 << (n as u32 - 'a' as u32));
         Ok(Poll { flags })
-    }).map(Result::unwrap))
+    }).map(Result::unwrap)
 }
 
-struct PollIterator<T: Iterator<Item=Poll>>(T);
+pub struct PollIterator<T: Iterator<Item=Poll>>(pub T);
 impl<T: Iterator<Item=Poll>> Iterator for PollIterator<T> {
     type Item = Poll;
 
@@ -13,8 +13,25 @@ impl<T: Iterator<Item=Poll>> Iterator for PollIterator<T> {
         let poll = self.0
             .by_ref()
             .take_while(|p| !p.is_emtpy())
-            .fold(Poll { flags: 0}, |acc, p| acc.combine(p));
+            .fold(Poll { flags: 0}, |acc, p| acc.or(p));
         if poll.flags != 0 { 
+            Some(poll)
+        } else {
+            None
+        } 
+    }
+}
+
+pub struct AllPollIterator<T: Iterator<Item=Poll>>(pub T);
+impl<T: Iterator<Item=Poll>> Iterator for AllPollIterator<T> {
+    type Item = Poll;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let poll = self.0
+            .by_ref()
+            .take_while(|p| !p.is_emtpy())
+            .fold(Poll { flags: u32::max_value()}, |acc, p| acc.and(p));
+        if poll.flags != u32::max_value() { 
             Some(poll)
         } else {
             None
@@ -34,7 +51,10 @@ impl Poll {
     fn is_emtpy(&self) -> bool {
         self.flags == 0
     }
-    fn combine(&self, other: Poll) -> Poll {
+    fn or(&self, other: Poll) -> Poll {
         Poll { flags: self.flags | other.flags}
+    }
+    fn and(&self, other: Poll) -> Poll {
+        Poll { flags: self.flags & other.flags}
     }
 }
