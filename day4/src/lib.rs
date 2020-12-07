@@ -65,6 +65,7 @@ fn count_valid_passports_on_iter<T: Fn(Flags, &str) -> Result<bool, utils::Error
     counter
 }
 
+#[cfg(test)]
 mod tests {
 
     #[test]
