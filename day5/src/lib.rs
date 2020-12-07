@@ -37,6 +37,8 @@ impl Seat {
     }
 }
 
+
+#[cfg(test)]
 mod tests {
     #[test]
     fn decode_id() {
