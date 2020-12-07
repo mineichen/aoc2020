@@ -38,7 +38,7 @@ impl<T, TFn: Fn(&str) -> Result<T, Error>, TRead: Read> LineReaderIterator<T, TF
             reader: BufReader::new(read), 
             buffer: String::new(), 
             mapper
-         }
+        }
     }
 }
 
