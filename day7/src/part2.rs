@@ -1,4 +1,4 @@
-mod lib;
+pub mod lib;
 
 fn main() {
     let mut hashmap = std::collections::HashMap::new();

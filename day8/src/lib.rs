@@ -48,7 +48,7 @@ impl CodeEmulator {
                 Instruction::Jmp(x) => {
                     self.pc = (self.pc as i64 + x - 1) as usize;
                 },
-                Instruction::Nop(x) => {
+                Instruction::Nop(_) => {
                 }
             }
             self.pc += 1;
