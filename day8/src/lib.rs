@@ -6,7 +6,7 @@ pub fn parse(path: &str) -> CodeEmulator {
                 let mut it = line.split(' ');
                 Ok (match it.next().unwrap() {
                     "acc" => Instruction::Acc(it.next().unwrap().parse()?),
-                    "nop" => Instruction::Nop(),
+                    "nop" => Instruction::Nop(it.next().unwrap().parse()?),
                     "jmp" => Instruction::Jmp(it.next().unwrap().parse()?),
                     _ => return Err(utils::Error::Format("Unknown instruction"))
                 })                
@@ -15,15 +15,16 @@ pub fn parse(path: &str) -> CodeEmulator {
     )
 }
 
+#[derive(Clone)]
 pub struct CodeEmulator {
     pub accumulator: i64,
     pc: usize,
-    program: Vec<Instruction>
+    pub instructions: Vec<Instruction>
 }
 
 impl CodeEmulator {
     fn new(program: Vec<Instruction>) -> Self {
-        Self { program, accumulator: 0, pc: 0 }
+        Self { instructions: program, accumulator: 0, pc: 0 }
     }
     pub fn run(&mut self) -> Result<(), Error> {
         let mut visited = BoolMap::new();
@@ -32,9 +33,11 @@ impl CodeEmulator {
             if visited.is_set(self.pc) {
                 return Err(Error::InfiniteLoop(self.pc));
             }
-            let instruction = self.program
-                .get(self.pc)
-                .ok_or(Error::PcOutOfBound(self.pc))?;
+            let instruction = match self.instructions.get(self.pc) {
+                Some(x) => x,
+                None => return Ok(())
+            };
+                
             trace.push(instruction.clone());
 
             visited.set(self.pc);
@@ -45,29 +48,26 @@ impl CodeEmulator {
                 Instruction::Jmp(x) => {
                     self.pc = (self.pc as i64 + x - 1) as usize;
                 },
-                Instruction::Nop() => {
+                Instruction::Nop(x) => {
                 }
             }
             self.pc += 1;
-
         }
     }
 }
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-    #[error("Program-counter is out of bounds {0}")]
-    PcOutOfBound(usize),
-    
+       
     #[error("Program runs infinite at position {0}")]
     InfiniteLoop(usize)
 }
 
 #[derive(Debug, Clone)]
-enum Instruction {
+pub enum Instruction {
     Acc(i64),
     Jmp(i64),
-    Nop()
+    Nop(i64)
 }
 
 struct BoolMap(Vec<usize>);

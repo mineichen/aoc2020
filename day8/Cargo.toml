@@ -8,7 +8,10 @@ edition = "2018"
 
 [[bin]]
 name = "day8part1"
-path = "src/main.rs"
+path = "src/part1.rs"
+[[bin]]
+name = "day8part2"
+path = "src/part2.rs"
 
 [dependencies]
 utils = { path = "../utils" }
