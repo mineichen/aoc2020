@@ -63,7 +63,6 @@ impl Iterator for TribonacciIter {
 }
 
 pub fn count_joints(sorted_adapters: Vec<usize>) -> Vec<usize> {
-    let mut last = 0;
     let mut diffs = Vec::new();
 
     for cur in sorted_adapters.windows(2) {
