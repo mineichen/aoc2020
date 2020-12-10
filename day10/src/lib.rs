@@ -12,16 +12,14 @@ pub fn load_sorted(path: &str) -> Vec<usize> {
 pub fn count_combinations(path: &str) -> usize {
     let data = load_sorted(path);
     let mut result = 1;
-    let mut low = 0;
-    for (i, window) in data.windows(2).enumerate() {
-        let first = window[0];
-        let second = window[1];
-        if second - first == 3 {
-            let to_skip = 1.max(i as i64 - low as i64) as usize;
-            result *= TribonacciIter::new().skip(to_skip).next().unwrap();
-            low = i + 1;
-        }
+    let mut it = data.windows(2).peekable();
+    while let Some(_) = it.peek() {
+        let count = it.by_ref()
+            .take_while(|window|window[1] - window[0] < 3)
+            .count();
+        result *= TribonacciIter::new().skip(count).next().unwrap();
     }
+
     result
 }
 
@@ -72,7 +70,7 @@ pub fn count_joints(sorted_adapters: Vec<usize>) -> Vec<usize> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    static TEST_DATA_PATH: &str = "day10/testdata.txt";
+    static TEST_DATA_PATH: &str = "../day10/testdata.txt";
     #[test]
     fn count_joints_test() {
         let result = count_joints(load_sorted(TEST_DATA_PATH));
