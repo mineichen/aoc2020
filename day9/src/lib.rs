@@ -7,8 +7,7 @@ pub fn read_cypher() -> Vec<u64> {
     ).map(Result::unwrap).collect()    
 }
 
-pub fn validate(data: &Vec<u64>) -> Result<(), u64>{
-    let data = read_cypher();
+pub fn validate(data: &Vec<u64>) -> Result<(), u64> {
     for window in data.windows(25+1) {
         let previous = &window[0..25];
         let current = window[25];
