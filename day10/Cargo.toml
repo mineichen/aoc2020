@@ -7,10 +7,10 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [[bin]]
-name = "day8part1"
+name = "day10part1"
 path = "src/part1.rs"
 [[bin]]
-name = "day8part2"
+name = "day10part2"
 path = "src/part2.rs"
 
 [dependencies]

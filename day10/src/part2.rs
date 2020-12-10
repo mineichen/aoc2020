@@ -1,3 +1,5 @@
+pub mod lib;
+
 fn main() {
-    println!("Hello, world!");
+    println!("Count Combinations: {}", lib::count_combinations("day10/input.txt"));
 }
