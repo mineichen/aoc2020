@@ -1,9 +1,5 @@
 pub fn load_sorted(path: &str) -> Vec<usize> {
-
-    let mut result = utils::LineReaderIterator::from_file(
-            path, 
-            move|line| Ok(line.parse()?)
-        )
+    let mut result = utils::LineReaderIterator::from_file(path, move |line| Ok(line.parse()?))
         .map(Result::unwrap)
         .chain(std::iter::once(0))
         .collect::<Vec<_>>();
@@ -20,19 +16,16 @@ pub fn count_combinations(path: &str) -> usize {
     for (i, window) in data.windows(2).enumerate() {
         let first = window[0];
         let second = window[1];
-        if second-first == 3 {
-            let to_skip = 1.max(i as i64-low as i64) as usize;
-            result *= TribonacciIter::new()
-                .skip(to_skip)
-                .next()
-                .unwrap();
-            low = i+1;
+        if second - first == 3 {
+            let to_skip = 1.max(i as i64 - low as i64) as usize;
+            result *= TribonacciIter::new().skip(to_skip).next().unwrap();
+            low = i + 1;
         }
     }
     result
 }
 
-struct TribonacciIter([usize;3], u8);
+struct TribonacciIter([usize; 3], u8);
 impl TribonacciIter {
     fn new() -> Self {
         TribonacciIter([1, 1, 2], 253)
@@ -76,7 +69,6 @@ pub fn count_joints(sorted_adapters: Vec<usize>) -> Vec<usize> {
     diffs
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -95,10 +87,9 @@ mod tests {
     #[test]
     fn test_tribonacci() {
         let test_sequence = [1, 1, 2, 4, 7, 13, 24, 44, 81].iter();
-        
+
         for (expected, result) in test_sequence.zip(TribonacciIter::new()) {
             assert_eq!(*expected, result);
         }
     }
 }
-

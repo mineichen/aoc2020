@@ -1,21 +1,28 @@
-use std::io::{self, BufReader};
-use std::io::prelude::*;
 use std::fs::File;
+use std::io::prelude::*;
+use std::io::{self, BufReader};
 
 fn main() -> io::Result<()> {
     let f = File::open("day1/input.txt")?;
     let f = BufReader::new(f);
-    let numbers = f.lines()
+    let numbers = f
+        .lines()
         .map(|s| s.unwrap().parse::<i32>().unwrap())
         .collect::<Vec<_>>();
     let (low, medium, high) = eval(numbers)?;
 
-    println!("Solution: {} * {} * {} = {}", low, medium, high, low * medium * high);
+    println!(
+        "Solution: {} * {} * {} = {}",
+        low,
+        medium,
+        high,
+        low * medium * high
+    );
     Ok(())
 }
 
 /// Puzzle result: 324 * 390 * 1306 = 165026160
-fn eval(mut numbers: Vec<i32>) -> io::Result<(i32,i32,i32)> {
+fn eval(mut numbers: Vec<i32>) -> io::Result<(i32, i32, i32)> {
     numbers.sort();
     const DESIRED_SUM: i32 = 2020;
 
@@ -28,11 +35,11 @@ fn eval(mut numbers: Vec<i32>) -> io::Result<(i32,i32,i32)> {
         while let Some(medium) = medium_iter.next() {
             medium_offset += 1;
             let maybe_high = DESIRED_SUM - *low - *medium;
-            if let Ok(_) = numbers[medium_offset..].binary_search(&maybe_high) {                
+            if let Ok(_) = numbers[medium_offset..].binary_search(&maybe_high) {
                 return Ok((*low, *medium, maybe_high));
             }
         }
-    };
+    }
     Err(io::Error::new(io::ErrorKind::InvalidData, "No result"))
 }
 

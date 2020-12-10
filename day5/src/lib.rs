@@ -1,4 +1,4 @@
-pub fn list_seats() -> impl Iterator<Item=Seat> {
+pub fn list_seats() -> impl Iterator<Item = Seat> {
     utils::LineReaderIterator::from_file("day5/input.txt", decode_seat).map(Result::unwrap)
 }
 
@@ -28,15 +28,18 @@ fn decode_seat(code: &str) -> Result<Seat, utils::Error> {
 pub struct Seat {
     pub row: u8,
     pub col: u8,
-    pub id: u16
+    pub id: u16,
 }
 
 impl Seat {
     fn new(col: u8, row: u8) -> Self {
-        Seat { col, row, id: row as u16 * 8 + col as u16 } 
+        Seat {
+            col,
+            row,
+            id: row as u16 * 8 + col as u16,
+        }
     }
 }
-
 
 #[cfg(test)]
 mod tests {

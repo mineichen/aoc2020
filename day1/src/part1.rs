@@ -1,11 +1,12 @@
-use std::io::{self, BufReader};
-use std::io::prelude::*;
 use std::fs::File;
+use std::io::prelude::*;
+use std::io::{self, BufReader};
 
 fn main() -> io::Result<()> {
     let f = File::open("day1/input.txt")?;
     let f = BufReader::new(f);
-    let mut numbers = f.lines()
+    let mut numbers = f
+        .lines()
         .map(|s| s.unwrap().parse::<u32>().unwrap())
         .collect::<Vec<_>>();
     numbers.sort();

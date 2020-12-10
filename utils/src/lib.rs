@@ -1,6 +1,6 @@
-use std::io::BufReader;
-use std::io::prelude::*;
 use std::fs::File;
+use std::io::prelude::*;
+use std::io::BufReader;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -11,13 +11,13 @@ pub enum Error {
     #[error("Format exception")]
     Format(&'static str),
     #[error("Format exception {0}")]
-    Split(char)
+    Split(char),
 }
 
 pub struct LineReaderIterator<T, TFn: FnMut(&str) -> Result<T, Error>, TRead: Read> {
     reader: BufReader<TRead>,
     buffer: String,
-    mapper: TFn
+    mapper: TFn,
 }
 
 impl<T, TFn: FnMut(&str) -> Result<T, Error>> LineReaderIterator<T, TFn, File> {
@@ -34,32 +34,25 @@ impl<T, TFn: FnMut(&str) -> Result<T, Error>> LineReaderIterator<T, TFn, std::io
 
 impl<T, TFn: FnMut(&str) -> Result<T, Error>, TRead: Read> LineReaderIterator<T, TFn, TRead> {
     pub fn from_reader(read: TRead, mapper: TFn) -> Self {
-        LineReaderIterator { 
-            reader: BufReader::new(read), 
-            buffer: String::new(), 
-            mapper
+        LineReaderIterator {
+            reader: BufReader::new(read),
+            buffer: String::new(),
+            mapper,
         }
     }
 }
 
-
-
-
-impl<T, TFn: FnMut(&str) -> Result<T, Error>, TRead: Read> Iterator for LineReaderIterator<T, TFn, TRead> {
+impl<T, TFn: FnMut(&str) -> Result<T, Error>, TRead: Read> Iterator
+    for LineReaderIterator<T, TFn, TRead>
+{
     type Item = Result<T, Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.buffer.clear();
         match self.reader.read_line(&mut self.buffer) {
-            Ok(n) if n > 0 =>  {
-                Some((self.mapper)(&self.buffer.trim_end()))                
-            },
-            Ok(_) => {
-                None
-            }
-            Err(e) => {
-                Some(Err(e.into()))
-            }
+            Ok(n) if n > 0 => Some((self.mapper)(&self.buffer.trim_end())),
+            Ok(_) => None,
+            Err(e) => Some(Err(e.into())),
         }
     }
 }
@@ -67,8 +60,8 @@ impl<T, TFn: FnMut(&str) -> Result<T, Error>, TRead: Read> Iterator for LineRead
 pub fn split_once(input: &str, delimiter: char) -> Result<(&str, &str), Error> {
     let mut first = input.splitn(2, delimiter);
     return Ok((
-        first.next().unwrap_or(""), 
-        first.next().ok_or(Error::Split(delimiter))?
+        first.next().unwrap_or(""),
+        first.next().ok_or(Error::Split(delimiter))?,
     ));
 }
 

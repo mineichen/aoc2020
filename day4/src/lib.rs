@@ -19,21 +19,25 @@ bitflags::bitflags! {
     }
 }
 
-pub fn count_valid_passports<T: Fn(Flags, &str) -> Result<bool, utils::Error>>(validator: T) -> u32 {
+pub fn count_valid_passports<T: Fn(Flags, &str) -> Result<bool, utils::Error>>(
+    validator: T,
+) -> u32 {
     count_valid_passports_on_iter(std::fs::File::open("day4/input.txt").unwrap(), validator)
 }
 
-fn count_valid_passports_on_iter<T: Fn(Flags, &str) -> Result<bool, utils::Error>,>(reader: impl std::io::Read, validator: T) -> u32 {
+fn count_valid_passports_on_iter<T: Fn(Flags, &str) -> Result<bool, utils::Error>>(
+    reader: impl std::io::Read,
+    validator: T,
+) -> u32 {
     let mut iter = utils::LineReaderIterator::from_reader(reader, |line| {
-        
         let mut result = Flags::empty();
         if line.is_empty() {
-            return Ok(result);   
+            return Ok(result);
         }
 
         for pair in line.trim().split(' ') {
             let (key, value) = utils::split_once(pair, ':')?;
-            
+
             let flag = match key {
                 "byr" => Flags::BYR,
                 "iyr" => Flags::IYR,
@@ -43,14 +47,15 @@ fn count_valid_passports_on_iter<T: Fn(Flags, &str) -> Result<bool, utils::Error
                 "ecl" => Flags::ECL,
                 "pid" => Flags::PID,
                 "cid" => Flags::CID,
-                _ => panic!("Unknown flag")
+                _ => panic!("Unknown flag"),
             };
             if flag == Flags::CID || (validator)(flag, value).unwrap_or(false) {
                 result |= flag;
-            }            
+            }
         }
         Ok(result)
-    }).map(Result::unwrap);
+    })
+    .map(Result::unwrap);
 
     let mut counter = 0;
     while let Some(item) = iter.next() {
@@ -74,10 +79,9 @@ mod tests {
         iyr:2010 ecl:grn
         cid:88
         hcl:#c0a76e";
-        let c = super::count_valid_passports_on_iter(
-            std::io::Cursor::new(input), 
-            |flag, _| Ok(flag != super::Flags::CID)
-        );
+        let c = super::count_valid_passports_on_iter(std::io::Cursor::new(input), |flag, _| {
+            Ok(flag != super::Flags::CID)
+        });
         assert_eq!(1, c);
     }
 }

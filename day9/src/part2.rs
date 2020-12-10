@@ -20,16 +20,16 @@ fn main() {
             } else {
                 let lower_index = last_lower.unwrap().0;
                 let upper_index = last_upper.unwrap().0;
-                let range = &data[lower_index+1..=upper_index];
+                let range = &data[lower_index + 1..=upper_index];
                 let checksum: u64 = range.iter().sum();
                 let checksum_diff = invalid_sum as i64 - checksum as i64;
                 assert!(checksum_diff == 0);
-                let (min, max) = range.iter()
-                    .fold(
-                        (u64::max_value(), u64::min_value()), 
-                        |(low, high), n| (low.min(*n), high.max(*n))
-                    );
-                
+                let (min, max) = range
+                    .iter()
+                    .fold((u64::max_value(), u64::min_value()), |(low, high), n| {
+                        (low.min(*n), high.max(*n))
+                    });
+
                 println!("{}+{}={}", min, max, min + max);
                 return;
             };
