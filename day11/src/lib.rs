@@ -58,37 +58,43 @@ impl PartialEq for Puzzle {
     }
 }
 
+pub fn immediate_neighbour_strategy(puzzle: &Puzzle, cur: CellState, pos: usize) -> CellState {
+    let cols = puzzle.cols;
+    let count_adjacent = (puzzle.cells[pos-cols-1] == CellState::Occupied) as u8
+        + (puzzle.cells[pos-cols] == CellState::Occupied) as u8
+        + (puzzle.cells[pos-cols+1] == CellState::Occupied) as u8
+        + (puzzle.cells[pos-1] == CellState::Occupied) as u8
+        + (puzzle.cells[pos+1] == CellState::Occupied) as u8
+        + (puzzle.cells[pos+cols-1] == CellState::Occupied) as u8
+        + (puzzle.cells[pos+cols] == CellState::Occupied) as u8
+        + (puzzle.cells[pos+cols+1] == CellState::Occupied) as u8;
+
+    if cur == CellState::Occupied {
+        if count_adjacent >= 4 { CellState::Available } else { CellState::Occupied }
+    } else {
+        debug_assert!(cur == CellState::Available);
+        if count_adjacent == 0 { CellState::Occupied } else { CellState::Available }
+    }
+}
+
 impl Puzzle {
     fn new(cells: Vec<CellState>, cols: usize, rows: usize) -> Self {
         let buffer = cells.clone();
         Puzzle {cells, buffer, cols, rows}
     }
 
-    pub fn apply_once(&mut self) -> bool {
+    pub fn apply_once<T: Fn(&Puzzle, CellState, usize) -> CellState>(&mut self, strategy: T) -> bool {
         let mut has_change = false;
-        let cols = self.cols;
-        let mut pos = cols;
+        let mut pos = self.cols;
         for y in 1..self.rows-1 {
             pos += 1;
-            for x in 1..(cols-1) {
-                debug_assert_eq!(pos, x + y*cols);
+            for x in 1..(self.cols-1) {
+                debug_assert_eq!(pos, x + y*self.cols);
                 let cur = self.cells[pos];
-                if cur != CellState::Floor {                
-                    let count_adjacent = (self.cells[pos-cols-1] == CellState::Occupied) as u8
-                        + (self.cells[pos-cols] == CellState::Occupied) as u8
-                        + (self.cells[pos-cols+1] == CellState::Occupied) as u8
-                        + (self.cells[pos-1] == CellState::Occupied) as u8
-                        + (self.cells[pos+1] == CellState::Occupied) as u8
-                        + (self.cells[pos+cols-1] == CellState::Occupied) as u8
-                        + (self.cells[pos+cols] == CellState::Occupied) as u8
-                        + (self.cells[pos+cols+1] == CellState::Occupied) as u8;
-                    
-                    *self.buffer.get_mut(pos).unwrap() = if cur == CellState::Occupied {
-                        if count_adjacent >= 4 { has_change = true; CellState::Available} else {CellState::Occupied }
-                    } else {
-                        debug_assert!(cur == CellState::Available);
-                        if count_adjacent == 0 {has_change = true; CellState::Occupied} else { CellState::Available}                        
-                    };
+                if cur != CellState::Floor {
+                    let new_state = (strategy)(&self, cur, pos);
+                    has_change |= cur != new_state;
+                    *self.buffer.get_mut(pos).unwrap() = new_state;                    
                 }
 
                 pos += 1;
@@ -133,7 +139,7 @@ mod tests {
 
         for path in paths {
             let puzzle = load_puzzle_with_floor_surrounding(path);
-            prev.apply_once();
+            prev.apply_once(immediate_neighbour_strategy);
             assert_eq!(prev, puzzle);
         }
     }
