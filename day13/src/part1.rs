@@ -1,5 +1,3 @@
-pub mod lib;
-
 fn main() -> Result<(), utils::Error>{
     let text = std::fs::read_to_string("day13/input.txt")?;
     let mut lines = text.split('\n').into_iter();
