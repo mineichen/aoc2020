@@ -129,7 +129,7 @@ mod tests {
 
     #[test]
     fn verify_testdata() {
-        let mut bag = Bag::new(lib::load("day17/test_input.txt"));
+        let mut bag = Bag::new(lib::load("../day17/test_input.txt"));
         for _ in 0..6 {
             bag.print_slice(0);
             bag.step();
