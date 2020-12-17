@@ -105,12 +105,12 @@ mod tests {
     use {super::*};
     #[test]
     fn init_memory_works() {
-        let result = load("day14/test_input.txt");
+        let result = load("../day14/test_input.txt");
         assert_eq!(165, result.iter().sum::<u64>());
     }
     #[test]
     fn init_memory_v2_works() {
-        let result = load_v2("day14/test_input_part2.txt");
+        let result = load_v2("../day14/test_input_part2.txt");
         assert_eq!(208, result.values().sum::<u64>());
     }
 }
