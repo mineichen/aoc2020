@@ -9,7 +9,7 @@ use {
         character::complete,
         sequence::{delimited, preceded},
         branch::alt,
-        multi::{fold_many0},
+        multi::fold_many0,
         error::ParseError
     },
     std::str::FromStr
