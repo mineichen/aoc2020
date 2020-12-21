@@ -1,66 +1,102 @@
-extern crate nom;
+use nom::sequence::tuple;
+
 
 use {
     nom::{
         IResult, 
-        bytes::complete::{tag, take_while1}, 
+        bytes::complete::{take_while1, take_while}, 
         combinator::{map_res},
-        character::complete::char,
-        sequence::{delimited},
+        character::complete,
+        sequence::{delimited, preceded},
         branch::alt,
-        multi::{fold_many1}
+        multi::{fold_many0},
+        error::ParseError
     },
     std::str::FromStr
 };
 
-pub fn line_results(path: &str) -> impl Iterator<Item=i64> {
+pub fn line_results<TFn: Fn(&str) -> IResult<&str, i64>>(path: &str, mapper: TFn) -> impl Iterator<Item=i64> {
     utils::LineReaderIterator::from_file(
-            path, 
-            move |line| Ok(calculation_no_precedence(line).unwrap().1)
-        )
-        .map(Result::unwrap)
+        path, 
+        move |line| Ok((mapper)(line).unwrap().1)
+    )
+    .map(Result::unwrap)
 }
 
-fn calculation_no_precedence(i: &str) -> nom::IResult<&str, i64>  {
-    let (mut i, mut result) = expression(i)?;
-    while let Ok((irest, r)) = operation(i, result) {
-        i = irest;
-        result = r;
-    }
-    
-    Ok((i, result))
-}
-fn expression(i: &str) -> nom::IResult<&str, i64> {
-    let (i, inner) = alt((
-         (delimited(char('('), calculation_no_precedence, char(')'))),
-         number
-    ))(i.trim_start())?;
-    Ok((i, inner))
+fn sp<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, &'a str, E> {
+    let chars = " \t\r\n";
+  
+    // nom combinators like `take_while` return a function. That function is the
+    // parser,to which we can pass the input
+    take_while(move |c| chars.contains(c))(i)
 }
 
-pub fn operation(i: &str, before: i64) -> nom::IResult<&str, i64> {
-    
-    let (i, op) = alt((char('+'), char('*')))(i.trim_start())?;
-    let (i, second) = expression(i)?;
-    
-    Ok((i, match op {
-        '+' => before + second,
-        '*' => before * second,
+pub fn calculation_no_precedence(i: &str) -> nom::IResult<&str, i64>  {
+    let (i, result) = expression(i)?;
+    fold_many0(tuple((
+        preceded(sp, alt((complete::char('+'), complete::char('*')))), 
+        preceded(sp, expression)
+    )), result, |acc, (op, next)| match op {
+        '+' => acc + next,
+        '*' => acc * next,
         _ => panic!("Foo")
-    }))
+    })(i)
+}
+
+fn expression(i: &str) -> nom::IResult<&str, i64> {
+    alt((
+         (delimited(complete::char('('), calculation_no_precedence, complete::char(')'))),
+         number
+    ))(i)
 }
 
 fn number(i: &str) -> nom::IResult<&str, i64> {
-    let (i, n) = map_res(
+    map_res(
         take_while1(|c: char| c.is_digit(10)),
         FromStr::from_str
-    )(i.trim_start())?;
-    Ok((i, n))
+    )(i)
+}
+
+fn expression_precedence(i: &str) -> nom::IResult<&str, i64> {
+    alt((
+         (delimited(complete::char('('), calculation_precedence, complete::char(')'))),
+         number
+    ))(i)
+}
+pub fn calculation_precedence(i: &str) -> nom::IResult<&str, i64>  {
+    let (i, hold) = expression_precedence(i)?;
+    let mut pending_multiplication: Option<i64> = None;
+    let res = fold_many0(tuple((
+        preceded(sp, alt((complete::char('+'), complete::char('*')))), 
+        preceded(sp, expression_precedence)
+    )), hold, |acc, (op, next)| match op {
+        '+' => { 
+            match pending_multiplication {
+                Some(x) => { pending_multiplication = Some(x + next); acc },
+                None => acc + next
+            }
+        },
+        '*' => { 
+            match pending_multiplication {
+                Some(x) => { let result = acc * x; pending_multiplication = Some(next); result},
+                None => { pending_multiplication = Some(next); acc }
+            }
+        },
+        _ => panic!("Foo")
+    })(i)?;
+    Ok((res.0, res.1 * pending_multiplication.unwrap_or(1)))
 }
 
 #[cfg(test)]
 mod tests {
     use {super::*};
+    #[test]
+    fn parse_precedence() {
+        let (rest, n) = calculation_precedence("((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2").unwrap();
+        
+        assert_eq!(rest, "");
+        assert_eq!(23340, n);
+    }
     #[test]
     fn parse_simple() {
         let (rest, n) = number("11+2").unwrap();
@@ -79,12 +115,7 @@ mod tests {
         assert_eq!(23, n);
         assert_eq!(rest, "");
     }
-    #[test]
-    fn parse_product_parantesis() {
-        let (rest, n) = expression("(11*2)+1").unwrap();
-        assert_eq!(22, n);
-        assert_eq!(rest, "+1");
-    }  
+    
     #[test]
     fn parse_product_parantesis_first() {
         let (rest, n) = calculation_no_precedence("2 * 3 + (4 * 5)").unwrap();
