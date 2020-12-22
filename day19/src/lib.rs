@@ -31,16 +31,22 @@ pub fn load(path: &str) -> (Evaluator, impl Iterator<Item=String>) {
 }
 
 pub struct Evaluator {
-    rules: HashMap<usize, Rule>
+    pub rules: HashMap<usize, Rule>
 }
 
 impl Evaluator {
     pub fn check<'a>(&'a self, rule: &usize, chars: &str) -> bool {
-        self.match_len(rule, chars) == chars.len()
+        self.match_len(rule, chars, vec!()) == chars.len()
     }
-    fn match_len<'a>(&'a self, rule: &usize, chars: &str) -> usize {
-        match &self.rules[&rule] {
+    pub fn replace_8_and_11(&mut self) -> Result<(),()>  {
+        *self.rules.get_mut(&8).ok_or(())? = Rule::Ref(vec!(vec!(42), vec!(42, 8)));
+        *self.rules.get_mut(&11).ok_or(())? = Rule::Ref(vec!(vec!(42, 31), vec!(42, 11, 31)));
+        Ok(())
+    }
+    fn match_len<'a>(&'a self, rule: &usize, chars: &str, trace: Vec<usize>) -> usize {
+        let m = match &self.rules[&rule] {
             Rule::Char(x) => {
+                println!("Char check: {}=={}?, {:?}", x, chars, trace);
                 (chars.chars().next() == Some(*x)) as usize
             },
             Rule::Ref(rule_refs) => {
@@ -48,14 +54,17 @@ impl Evaluator {
                 let any = rule_refs.iter().any(|ref_ids| {
                     count = 0;
                     ref_ids.iter().all(|id| {
-                        let offset = self.match_len(id, &chars[count..]);
+                        let mut traceclone = trace.clone();
+                        traceclone.push(*rule);
+                        let offset = self.match_len(id, &chars[count..], traceclone);
                         count += offset;
                         offset > 0
                     })
                 });
                 any as usize * count
             }
-        }
+        };
+        m * (m == chars.len()) as usize
     }
 }
 
@@ -70,12 +79,23 @@ mod tests {
     use {super::*};
     #[test]
     fn test_part_1() {
-        let (rules, msgs) = load("day19/test_input_part1.txt");
+        let (rules, msgs) = load("../day19/test_input_part1.txt");
         let count_valid = msgs
-            .filter(|m| {
-                rules.check(&0, &m)
-            })
+            .filter(|m| { rules.check(&0, &m) })
             .count();
         assert_eq!(2, count_valid);
+    }
+    #[test]
+    fn test_part_2() {
+        let (mut rules, msgs) = load("../day19/test_input_part2.txt");
+        let msgs = msgs.collect::<Vec<_>>();
+        //assert_eq!(3, msgs.iter().filter(|m| rules.check(&0, &m)).count());
+        rules.replace_8_and_11().unwrap();
+        assert!(rules.check(&0, "aaaaabbaabaaaaababaa"));
+        let count_valid = msgs
+            .iter()
+            .filter(|m| { rules.check(&0, &m)})
+            .count();
+        assert_eq!(11, count_valid);
     }
 }
