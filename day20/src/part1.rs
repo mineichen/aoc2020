@@ -6,6 +6,6 @@ fn main() {
     println!(
         "Corners: {:?}, product: {}",
         &corners,
-        corners.iter().map(|t| t.0).product::<usize>()
+        corners.iter().map(|t| t.tile_id.0).product::<usize>()
     );
 }
