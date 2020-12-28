@@ -155,8 +155,6 @@ pub struct Puzzle {
     ccw_lut: Vec<(u16, TileId)>
 }
 
-
-
 impl Puzzle {
     fn new(mut tiles: HashMap<TileId, Tile<bool>>) -> Self {
         let mut ccw_lut = Vec::with_capacity(tiles.len() * 4);
@@ -193,7 +191,7 @@ impl Puzzle {
                     if value.0 == 4 {
                         let rotations = 3 - if value.2 - value.1 == 1 
                             { value.1} else { 3 };
-                        println!("{:?} min: {}, max: {}, rot: {}", tile_id, value.1, value.2, rotations);
+                        
                         result[result_ctr] = Corner { 
                             tile_id: *tile_id, 
                             rotations
