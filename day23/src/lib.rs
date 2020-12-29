@@ -1,8 +1,8 @@
 pub struct Game {
-    input: Vec<u8>
+    input: Vec<usize>
 }
 impl Game {
-    pub const fn new(input: Vec<u8>) -> Self {
+    pub const fn new(input: Vec<usize>) -> Self {
         Self { input }
     }
     pub fn solve(&mut self, rounds: usize) -> usize {
@@ -10,8 +10,8 @@ impl Game {
         for _round in 0..rounds {
             let current_cup_label = self.input[current_cup_index];
             let mut source_idx = WrappingCounter::new(
-                current_cup_index as u8,
-                self.input.len() as u8
+                current_cup_index,
+                self.input.len()
             );
             let mut destination_idx = source_idx.clone();
 
@@ -35,16 +35,16 @@ impl Game {
             self.input[destination_idx.next() as usize] = following_labels[2];
             current_cup_index = next_current_cup as usize;
         }
-        let mut ctr = WrappingCounter::new(0, self.input.len() as u8);
+        let mut ctr = WrappingCounter::new(0, self.input.len());
         while self.input[ctr.cur as usize] != 1 {
             ctr.next();
         }
         (0..8).fold(0, |acc, _| acc * 10 + self.input[ctr.next() as usize] as usize)
     }
-    fn decrease_label_until_none_match(&self, label: u8, next_labels: &[u8]) -> u8 {
+    fn decrease_label_until_none_match(&self, label: usize, next_labels: &[usize]) -> usize {
         let mut result = label;
         loop {
-            result = if result == 1 { self.input.len() as u8 } else { result - 1 };
+            result = if result == 1 { self.input.len() } else { result - 1 };
             if !next_labels.contains(&result) {
                 return result;
             }
@@ -55,14 +55,14 @@ impl Game {
 
 #[derive(Clone)]
 struct WrappingCounter {
-    limit: u8,
-    cur: u8
+    limit: usize,
+    cur: usize
 }
 impl WrappingCounter {
-    fn new(cur: u8, limit: u8) -> Self{
+    fn new(cur: usize, limit: usize) -> Self{
         Self { cur, limit}
     }
-    fn next(&mut self) -> u8 {
+    fn next(&mut self) -> usize {
         self.cur = if self.cur < self.limit - 1 { self.cur + 1 } else { 0 };
         self.cur
     }
