@@ -1,0 +1,16 @@
+[package]
+name = "day25"
+version = "0.1.0"
+authors = ["Markus Ineichen <kusi.ineichen@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "day25part1"
+path = "src/part1.rs"
+[[bin]]
+name = "day25part2"
+path = "src/part2.rs"
+
+[dependencies]
