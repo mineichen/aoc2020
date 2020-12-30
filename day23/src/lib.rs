@@ -74,8 +74,8 @@ impl GameTrait for Game {
         Self { input, current_cup_index: 0 }
     }
     fn solve(&mut self, rounds: usize) {
-        let now = std::time::SystemTime::now();
-        for round in 0..rounds {
+        // let now = std::time::SystemTime::now();
+        for _round in 0..rounds {
             /*
             if round % 512 == 511 {
                 let micros = now.elapsed().unwrap().as_micros() as f64;
