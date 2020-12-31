@@ -65,6 +65,22 @@ impl Evaluator {
             }
         }
     }
+    
+    pub fn matches<TIter: Iterator<Item=usize> + Clone>(&self, mut rule_list: TIter, msg: &str) -> bool {
+        use Rule::*;
+        match rule_list.next() {
+            Some(head) => {
+                match self.rules.get(&head).unwrap() {
+                    Char(c) => msg.starts_with(*c) && self.matches(rule_list, &msg[1..]),
+                    Ref(r) => r.iter().any(|and_rules| self.matches(
+                        and_rules.iter().copied().chain(rule_list.clone()).collect::<Vec<_>>().into_iter(),
+                        msg
+                    ))
+                }
+            }
+            None => msg.is_empty()
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -84,17 +100,29 @@ mod tests {
             .count();
         assert_eq!(2, count_valid);
     }
+
+    #[test]
+    fn test_simple_recursive() {
+        let mut rules = HashMap::new();
+        rules.insert(0, Rule::Ref(vec!(vec!(1), vec!(1, 0))));
+        rules.insert(1, Rule::Char('a'));
+        rules.insert(2, Rule::Char('b'));
+        rules.insert(3, Rule::Ref(vec!(vec!(2, 1), vec!(0, 1))));
+        let eval = Evaluator { rules };
+        assert!( eval.matches(std::iter::once(0), "aaa"));
+    }
+
     #[test]
     fn test_part_2() {
         let (mut rules, msgs) = load("../day19/test_input_part2.txt");
         let msgs = msgs.collect::<Vec<_>>();
         //assert_eq!(3, msgs.iter().filter(|m| rules.check(&0, &m)).count());
         rules.replace_8_and_11().unwrap();
-        assert!(rules.check(&0, "aaaaabbaabaaaaababaa"));
+        assert!(rules.matches(std::iter::once(0), "aaaaabbaabaaaaababaa"));
         let count_valid = msgs
             .iter()
-            .filter(|m| { rules.check(&0, &m)})
+            .filter(|m| { rules.matches(std::iter::once(0), &m)})
             .count();
-        assert_eq!(11, count_valid);
+        assert_eq!(12, count_valid);
     }
 }

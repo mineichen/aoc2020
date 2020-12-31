@@ -167,11 +167,11 @@ mod tests {
 
     #[test]
     fn count_flipped_in_test_input() {
-        assert_eq!(10, load_flipped("day24/test_input.txt").len());
+        assert_eq!(10, load_flipped("../day24/test_input.txt").len());
     }
     #[test]
     fn flip_neighbours() {
-        assert_eq!(15, change_floor(load_flipped("day24/test_input.txt")).len());
+        assert_eq!(15, change_floor(load_flipped("../day24/test_input.txt")).len());
     }
 
     #[test]
