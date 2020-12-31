@@ -44,9 +44,9 @@ impl Evaluator {
         Ok(())
     }
     fn match_len<'a>(&'a self, rule: &usize, chars: &str, trace: Vec<usize>) -> usize {
-        let m = match &self.rules[&rule] {
+        match &self.rules[&rule] {
             Rule::Char(x) => {
-                println!("Char check: {}=={}?, {:?}", x, chars, trace);
+                //println!("Char check: {}=={}?, {:?}", x, chars, trace);
                 (chars.chars().next() == Some(*x)) as usize
             },
             Rule::Ref(rule_refs) => {
@@ -63,8 +63,7 @@ impl Evaluator {
                 });
                 any as usize * count
             }
-        };
-        m * (m == chars.len()) as usize
+        }
     }
 }
 

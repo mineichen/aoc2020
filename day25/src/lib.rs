@@ -1,7 +1,3 @@
-fn get_encryption_key(key_a: usize, key_b: usize) -> usize {
-    key_a
-}
-
 pub fn count_required_loops(base: usize, key: usize) -> usize {
     let mut nr = SubjectNumber::new(base);
     let mut ctr = 0;
